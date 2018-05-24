@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "matmul.h"
 
+#define TILE 16 
+
 Matrix Allocate2ndMatrix(int height, int width, int init);
 
 void matmul( float*, const float*, const float*, unsigned int, unsigned int, unsigned int);
@@ -19,16 +21,26 @@ void matmul( float*, const float*, const float*, unsigned int, unsigned int, uns
 void matmul(float* C, const float* A, const float* B, unsigned int hA, 
     unsigned int wA, unsigned int wB)
 {
-  for (unsigned int i = 0; i < hA; ++i)
-    for (unsigned int j = 0; j < wB; ++j) {
-      double sum = 0;
-      for (unsigned int k = 0; k < wA; ++k) {
-        double a = A[i * wA + k];
-        double b = B[j * wB + k];
-        sum += a * b;
+
+  for (unsigned int x = 0; x < hA; x += TILE) {
+    for (unsigned int y = 0; y < wB; y += TILE) {
+      for (unsigned int z = 0; z < wA; z += TILE) {
+
+        for (unsigned int i = x; i < x + TILE; ++i) {
+          for (unsigned int j = y; j < y + TILE; ++j) {
+            double sum = 0;
+            for (unsigned int k = z; k < z + TILE; ++k) {
+              double a = A[i * wA + k];
+              double b = B[j * wB + k];
+              sum += a * b;
+            }
+            C[i * wB + j] = (float)sum;
+          }
+        }
+
       }
-      C[i * wB + j] = (float)sum;
     }
+  }
 }
 
 // Allocate a matrix of dimensions height*width
