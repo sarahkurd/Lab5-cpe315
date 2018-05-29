@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "matmul.h"
 
 #define TILE 16 
@@ -30,13 +31,11 @@ void matmul(float* C, const float* A, const float* B, unsigned int hA,
           for (unsigned int j = y; j < y + TILE; ++j) {
             double sum = 0;
             for (unsigned int k = z; k < z + TILE; ++k) {
-              /* double a = A[i * wA + k]; */
-              /* double b = B[j * wB + k]; */
-              double a = A[i * TILE + k];
-              double b = B[j * TILE + k];
+              double a = A[i * wA + k];
+              double b = B[j * wB + k];
               sum += a * b;
             }
-            C[i * wB + j] = (float)sum;
+            C[i * wB + j] += (float)sum;
           }
         }
 
